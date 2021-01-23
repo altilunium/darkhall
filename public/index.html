@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>Darkhall</title>
+    <style>
+#messages {
+	margin-top: 50px;
+	width: 95%;
+	padding-right: 5px;
+	padding-bottom: 80px;
+}    	
+#bottom-bar {
+	    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 50px;
+    padding-top: 13px;
+    left: 0px;
+    background-color: #cacaca;
+
+}
+.chat-message{
+	margin-top:5px;
+}
+
+
+#chat {
+	width: 80%;
+	resize: none;
+	margin-left: 5px;
+}
+
+#send {
+	width: 38px;
+    height: 39px;
+    border-radius: 72px;
+    background-color: red;
+    border: none;
+    margin-left:7px;
+}
+#chat:active{
+	border: none;
+}
+#send:active {
+	border: none;
+}
+#header{
+	position: fixed;
+	width: 100%;
+	height: 30px;
+	background-color:black;
+	top:0px;
+	left:0px;
+	color:white;
+	text-align: center;
+	padding-top: 9px;
+}    	
+
+    </style>
+
+</head>
+<body>
+ 
+<div id="header"></div>
+<div id="messages" class="card-block"></div>
+                     
+<br>
+
+<div id="bottom-bar">
+<textarea id="chat" name="inputMessage" ></textarea>
+<button id="send" class="btn"></button>
+</div>
+            
+
+
+</body>
+
+<script type="text/javascript">
+    
+
+const input = document.querySelector('#chat')
+const messages = document.querySelector('#messages')
+const username = document.querySelector('#username')
+const send = document.querySelector('#send')
+const header = document.querySelector('#header')
+
+const url = "ws://" + window.location.host + "/ws";
+const ws = new WebSocket(url);
+
+function makeid(length) {
+   var result           = '';
+   var characters       = 'BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz0123456789';
+   var charactersLength = characters.length;
+   for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return result;
+}
+var userID = makeid(5);
+
+
+function heartbeat(){
+	var hb = {
+		username :userID,
+		hb : "+"
+	}
+	ws.send(JSON.stringify(hb))
+}
+
+
+ws.addEventListener('open',function(event){
+var join_message = {
+	username : userID,
+	content : "joined"
+}
+ws.send(JSON.stringify(join_message))
+setInterval(heartbeat, 1000)
+
+document.addEventListener("keyup",function(e){
+	if(e.keyCode === 13){
+		const message = {
+        username: userID,
+        content: input.value,
+    }
+
+    ws.send(JSON.stringify(message));
+    input.value = "";
+    input.focus();
+	} 
+})
+
+
+
+})
+
+
+
+
+
+
+
+
+ws.onmessage = function (msg) {
+    console.log(msg.data)
+    insertMessage(JSON.parse(msg.data))
+};
+
+send.onclick = () => {
+    console.log("Sending")
+    const message = {
+        username: userID,
+        content: input.value,
+    }
+
+    ws.send(JSON.stringify(message));
+    input.value = "";
+    input.focus();
+};
+
+
+
+
+
+
+
+
+/**
+ * Insert a message into the UI
+ * @param {Message that will be displayed in the UI} messageObj
+ */
+function insertMessage(messageObj) {
+    // Create a div object which will hold the message
+    const message = document.createElement('div')
+
+    // Set the attribute of the message div
+    message.setAttribute('class', 'chat-message')
+    console.log(messageObj);
+
+    if (typeof messageObj.username !== 'undefined') {
+    	if (!messageObj.hb) {
+    	console.log("name: " +messageObj.username + " content: " + messageObj.content)
+
+    	if (messageObj.content ==  "joined") {
+    		message.innerHTML = `<b>${messageObj.username} ${messageObj.content} ! </b>`
+    	}
+    	else{
+			message.innerHTML = `<b>${messageObj.username}</b>: ${messageObj.content}`    		
+    	}
+
+	    messages.appendChild(message)
+   		window.scrollBy(0,200)
+   		}
+    } else {
+    	document.title = messageObj
+    	header.innerHTML = messageObj
+    }
+
+    
+
+}
+
+/**
+ * Checks if the user input is valid
+ * @param {Message that will be validated} message
+ */
+function validateInput(message) {
+    return !(message.name.trim().length == 0 || message.content.trim().length == 0
+    || message.name == undefined || message.content == undefined
+    || message.name == null || message.content == null
+    || message.name == '' || message.content == '')
+}
+</script>
+
+
+</html>
+
