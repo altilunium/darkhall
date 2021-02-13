@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    
-    <title>Darkhall</title>
+    <title>Dark-Heya</title>
     <style>
 #messages {
 	margin-top: 50px;
@@ -88,7 +88,7 @@ const username = document.querySelector('#username')
 const send = document.querySelector('#send')
 const header = document.querySelector('#header')
 
-const url = "ws://" + window.location.host + "/ws";
+const url = "wss://" + window.location.host + "/ws";
 const ws = new WebSocket(url);
 
 function makeid(length) {
