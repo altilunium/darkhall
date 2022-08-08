@@ -1,4 +1,4 @@
-# dark-heya
+# dark-hall
 
 Manual : https://altilunium.github.io/blog/darkHeya.html
 
